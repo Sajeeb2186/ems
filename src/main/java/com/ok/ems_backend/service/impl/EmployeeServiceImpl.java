@@ -8,6 +8,9 @@ import com.ok.ems_backend.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class EmployeeServiceImpl  implements EmployeeService {
@@ -23,5 +26,53 @@ public class EmployeeServiceImpl  implements EmployeeService {
 
 
         return EmployeeMapper.mapToEmployeeDto(savedEmployee);
+    }
+
+    @Override
+    public EmployeeDto getEmployeeById(Long employeeId) {
+     Employee employee=employeeRepository.findById(employeeId)
+            .orElseThrow(()->
+                    new RuntimeException("Employee not found with id: " + employeeId));
+
+        return EmployeeMapper.mapToEmployeeDto(employee);
+    }
+
+    @Override
+    public List<EmployeeDto> getAllEmployees() {
+        List <Employee> employees= employeeRepository.findAll();
+        return employees.stream().map(EmployeeMapper::mapToEmployeeDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public EmployeeDto updateEmployee(Long id, EmployeeDto updatedEmployeeDto) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+        // Update the existing employee's fields with the new values
+         employee.setFirstName(updatedEmployeeDto.getFirstName());
+         employee.setLastName(updatedEmployeeDto.getLastName());
+         employee.setEmail(updatedEmployeeDto.getEmail());
+
+
+          Employee updatedEmployeeObj= employeeRepository.save(employee);
+
+
+
+        return EmployeeMapper.mapToEmployeeDto(updatedEmployeeObj);
+    }
+
+    @Override
+    public void deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+        employeeRepository.delete(employee);
+
+
+
+
+
+
+
+
+
     }
 }
